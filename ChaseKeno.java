@@ -222,7 +222,7 @@ public class ChaseKeno {
         double gross = Math.round(betSize * mult * 100.0) / 100.0;
         double maxPayout = Math.round(betSize * MAX_MULTIPLIER * 100.0) / 100.0;
         double payout = Math.min(gross, maxPayout);
-        double net = Math.round((payout - betSize) * 100.0) / 100.0;
+        double net = Math.round((payout - betSize - fee) * 100.0) / 100.0;
         return new Result(player, Math.round(betSize * 100.0) / 100.0,
                 proof.picks, proof.drawnTiles, matches, mult, fee, payout,
                 net, payout > 0, risk, proof, MAX_MULTIPLIER);
@@ -374,6 +374,8 @@ public class ChaseKeno {
         private String serverSeed = ProvablyFair.generateServerSeed();
         private DrawProof currentProof = null;
         private boolean running = false;
+        private javax.swing.Timer autoplayTimer;
+        private int autoplayRemaining;
         private final Set<Integer> picks = new HashSet<>();
 
         private final TileButton[] tile = new TileButton[41];
@@ -557,6 +559,7 @@ public class ChaseKeno {
             for (int i = 1; i <= 40; i++) tile[i].setSel(false);
         }
         private void resetAll() {
+            stopAutoplay();
             clearTable();
             serverSeed = ProvablyFair.generateServerSeed();
             nonce = 0; currentProof = null;
@@ -582,6 +585,7 @@ public class ChaseKeno {
             return betSize * multiplier;
         }
         private void runDraw() {
+            if (running) return;
             double bet = totalBet();
             if (bet <= 0) { statusLbl.setText("Enter a positive bet."); return; }
             if (bet > balance) { statusLbl.setText("Insufficient balance."); return; }
@@ -593,8 +597,9 @@ public class ChaseKeno {
             if (g > 1) autoplay(g);
         }
         private void applyResult(Result r, ProvablyFair pf) {
-            balance = Math.round((balance - r.betSize + r.finalPayout) * 100.0) / 100.0;
-            profit = Math.round((profit + r.finalPayout - r.betSize) * 100.0) / 100.0;
+            double totalCost = r.betSize + r.platformFeeAmount;
+            balance = Math.round((balance - totalCost + r.finalPayout) * 100.0) / 100.0;
+            profit = Math.round((profit + r.finalPayout - totalCost) * 100.0) / 100.0;
             refreshBalance();
             for (int i = 1; i <= 40; i++) {
                 int n = i;
@@ -620,20 +625,35 @@ public class ChaseKeno {
             payoutLbl.setText(sb.toString());
         }
         private void autoplay(int totalGames) {
+            stopAutoplay();
+            autoplayRemaining = totalGames - 1;
             running = true;
-            new Thread(() -> {
-                for (int i = 1; i < totalGames && running; i++) {
-                    double bet = totalBet();
-                    if (bet > balance) break;
-                    try { Thread.sleep(90); } catch (InterruptedException ignored) {}
-                    SwingUtilities.invokeLater(() -> {
-                        ProvablyFair pf = new ProvablyFair(serverSeed, clientSeed, nonce);
-                        Result r = resolveRound(bet, picks, risk, pf, "Player");
-                        applyResult(r, pf);
-                    });
+            autoplayTimer = new javax.swing.Timer(90, e -> {
+                if (!running || autoplayRemaining <= 0) {
+                    stopAutoplay();
+                    return;
                 }
-                running = false;
-            }).start();
+                double bet = totalBet();
+                if (bet <= 0 || bet > balance || picks.isEmpty()) {
+                    stopAutoplay();
+                    return;
+                }
+                ProvablyFair pf = new ProvablyFair(serverSeed, clientSeed, nonce);
+                Result r = resolveRound(bet, picks, risk, pf, "Player");
+                applyResult(r, pf);
+                autoplayRemaining--;
+                if (autoplayRemaining == 0) stopAutoplay();
+            });
+            autoplayTimer.setRepeats(true);
+            autoplayTimer.start();
+        }
+        private void stopAutoplay() {
+            running = false;
+            if (autoplayTimer != null) {
+                autoplayTimer.stop();
+                autoplayTimer = null;
+            }
+            autoplayRemaining = 0;
         }
         private void verifyRound() {
             if (currentProof == null) {
