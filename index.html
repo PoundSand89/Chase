@@ -97,6 +97,25 @@
         </aside>
       </section>
     </main>
+    <div id="result-modal" class="modal-backdrop" hidden>
+      <section class="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <button id="close-result" class="modal-close" aria-label="Close result">×</button>
+        <p id="result-kicker" class="eyebrow">ROUND COMPLETE</p>
+        <h2 id="result-title">You won</h2>
+        <p id="result-summary" class="result-summary"></p>
+        <div class="result-amount">
+          <span>Payout</span>
+          <strong id="result-payout">$0.00</strong>
+        </div>
+        <dl class="result-details">
+          <dt>Bet</dt><dd id="result-bet">$0.00</dd>
+          <dt>Platform fee</dt><dd id="result-fee">$0.00</dd>
+          <dt>Net result</dt><dd id="result-net">$0.00</dd>
+          <dt>Balance</dt><dd id="result-balance">$0.00</dd>
+        </dl>
+        <button id="result-done" class="button draw-button">Continue</button>
+      </section>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>

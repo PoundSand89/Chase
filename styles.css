@@ -81,5 +81,24 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 .status-message.win { color: var(--win); }
 .status-message.lose { color: var(--lose); }
 .fee-note { margin-top: 13px; color: var(--muted); font-size: .72rem; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: rgba(3, 9, 20, .78); backdrop-filter: blur(8px); }
+.modal-backdrop[hidden] { display: none; }
+.result-modal { position: relative; width: min(100%, 390px); padding: 30px; border: 1px solid var(--outline); border-radius: 24px; background: linear-gradient(145deg, #1b3b63, #102342); box-shadow: 0 25px 80px rgba(0,0,0,.45); text-align: center; }
+.modal-close { position: absolute; top: 10px; right: 14px; border: 0; color: var(--muted); background: transparent; font-size: 1.8rem; line-height: 1; }
+.modal-close:hover { color: var(--text); }
+.result-modal.win { border-color: var(--win); }
+.result-modal.lose { border-color: var(--lose); }
+.result-modal h2 { margin-top: 5px; font-size: 1.8rem; }
+.result-modal.win h2 { color: var(--win); }
+.result-modal.lose h2 { color: var(--lose); }
+.result-summary { margin-top: 8px; color: var(--muted); }
+.result-amount { margin: 22px 0; padding: 15px; border: 1px solid var(--outline-soft); border-radius: 15px; background: rgba(8,18,37,.35); }
+.result-amount span { display: block; color: var(--muted); font-size: .75rem; }
+.result-amount strong { display: block; margin-top: 3px; color: var(--accent); font-size: 2rem; }
+.result-details { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 14px; margin: 0 0 22px; text-align: left; }
+.result-details dt { color: var(--muted); }
+.result-details dd { margin: 0; text-align: right; font-weight: 800; }
+.result-details dd.net-positive { color: var(--win); }
+.result-details dd.net-negative { color: var(--lose); }
 @media (max-width: 850px) { .game-layout { display: grid; } .side-panel { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .app-shell { width: min(100% - 20px, 1400px); padding-top: 16px; } .topbar { align-items: flex-start; gap: 12px; } .account-card { min-width: 135px; } .controls { align-items: stretch; } .control-group { flex: 1 1 120px; } .controls .button { flex: 1 1 100px; } .panel-heading { display: grid; } .pick-control { text-align: left; } .side-panel { grid-template-columns: 1fr; } }

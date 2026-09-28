@@ -122,11 +122,7 @@ async function playOne() {
   if (bet <= 0) return setStatus("Enter a positive bet.", "lose");
   if (totalCost(bet) > state.balance) return setStatus("Insufficient balance for bet and fee.", "lose");
   if (!state.picks.size) return setStatus("Pick at least one tile.", "lose");
-  const proof = await drawRound(
-    state.lastProof.nonce,
-    state.lastProof.clientSeed,
-    new Set(state.lastProof.picks)
-  );
+  const proof = await drawRound(state.nonce, $("client-seed").value, new Set(state.picks));
   const table = TABLES[$("risk").value][state.picks.size - 1] || [];
   const matches = proof.picks.filter((pick) => proof.drawn.includes(pick)).length;
   const multiplier = table[matches] || 0;
@@ -137,8 +133,19 @@ async function playOne() {
   state.drawn = new Set(proof.drawn);
   state.lastProof = { ...proof, serverSeed: state.serverSeed, clientSeed: $("client-seed").value, nonce: state.nonce };
   state.nonce += 1;
+  const result = {
+    bet,
+    fee: fee(bet),
+    payout,
+    net,
+    matches,
+    picks: state.picks.size,
+    balance: state.balance
+  };
+  state.lastResult = result;
   setStatus(`${payout > 0 ? "WIN" : "LOSE"} ${matches}/${state.picks.size} · net $${net.toFixed(2)}`, payout > 0 ? "win" : "lose");
   render();
+  return result;
 }
 
 async function play() {
@@ -147,22 +154,52 @@ async function play() {
   state.running = true;
   $("draw").disabled = true;
   for (let game = 0; game < games; game += 1) {
-    await playOne();
+    const result = await playOne();
+    if (!result) break;
     if (totalCost(betAmount()) > state.balance) break;
     if (game < games - 1) await new Promise((resolve) => setTimeout(resolve, 120));
   }
   state.running = false;
   $("draw").disabled = false;
+  if (state.lastResult) showResult(state.lastResult);
 }
 
 async function verify() {
   if (!state.lastProof) return setStatus("No round has been played yet.", "lose");
-  const proof = await drawRound();
+  const proof = await drawRound(
+    state.lastProof.nonce,
+    state.lastProof.clientSeed,
+    new Set(state.lastProof.picks)
+  );
   const valid = proof.verificationHash === state.lastProof.verificationHash
     && proof.drawn.join(",") === state.lastProof.drawn.join(",");
   $("proof-status").textContent = valid ? "Verified" : "Failed";
   $("proof-status").classList.toggle("success", valid);
   setStatus(valid ? "The last draw is verified." : "Verification failed.", valid ? "win" : "lose");
+}
+
+function formatMoney(value) {
+  return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function showResult(result) {
+  const modal = $("result-modal");
+  const won = result.payout > 0;
+  $("result-kicker").textContent = won ? "WINNING ROUND" : "ROUND COMPLETE";
+  $("result-title").textContent = won ? "You won" : "No payout this round";
+  $("result-summary").textContent = `${result.matches}/${result.picks} numbers matched`;
+  $("result-payout").textContent = formatMoney(result.payout);
+  $("result-bet").textContent = formatMoney(result.bet);
+  $("result-fee").textContent = formatMoney(result.fee);
+  $("result-net").textContent = formatMoney(result.net);
+  $("result-balance").textContent = formatMoney(result.balance);
+  $("result-net").className = result.net >= 0 ? "net-positive" : "net-negative";
+  modal.querySelector(".result-modal").className = `result-modal ${won ? "win" : "lose"}`;
+  modal.hidden = false;
+}
+
+function closeResult() {
+  $("result-modal").hidden = true;
 }
 
 function buildBoard() {
@@ -194,6 +231,11 @@ function bindControls() {
   $("risk").addEventListener("change", render);
   $("draw").addEventListener("click", play);
   $("verify").addEventListener("click", verify);
+  $("close-result").addEventListener("click", closeResult);
+  $("result-done").addEventListener("click", closeResult);
+  $("result-modal").addEventListener("click", (event) => {
+    if (event.target === $("result-modal")) closeResult();
+  });
   $("clear").addEventListener("click", () => { state.picks.clear(); state.drawn.clear(); setStatus("Board cleared."); render(); });
   $("random-pick").addEventListener("click", () => {
     state.picks = new Set(Array.from({ length: 40 }, (_, index) => index + 1).sort(() => Math.random() - .5).slice(0, state.pickTarget || 10));
