@@ -16,9 +16,5 @@
   ],
   "author": "PoundSand89",
   "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {
-    "@vercel/ncc": "latest",
-    "@vercel/docker": "latest"
-  }
+  "dependencies": {}
 }

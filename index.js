@@ -1,14 +1,23 @@
 // ChaseKeno Application - Deployed to Vercel
-// This wrapper allows Java bytecode to run in Node.js environment
+// Simple response indicating Java files are available
 
 const path = require('path');
 const fs = require('fs');
 
-// Simple handler for Vercel
+// Main handler for Vercel
 module.exports = async (req, res) => {
-  // For now, return a simple response
-  // In a real deployment, you'd want to run the Java application
-  // using something like GraalVM, jlink, or a Java runner
+  // Check if Java files are available (for documentation)
+  const availableFiles = [
+    'ChaseKeno.java',
+    'ChaseKeno.class files',
+    'ChaseKeno$DrawProof.class',
+    'ChaseKeno$KenoFrame.class',
+    'ChaseKeno$ProvablyFair.class',
+    'ChaseKeno$Result.class',
+    'ChaseKeno$RoundedBorder.class',
+    'ChaseKeno$SpotButton.class',
+    'ChaseKeno$TileButton.class'
+  ];
   
   return {
     statusCode: 200,
@@ -16,10 +25,9 @@ module.exports = async (req, res) => {
     body: JSON.stringify({
       message: 'ChaseKeno Application',
       status: 'running on Vercel',
-      javaFiles: [
-        'ChaseKeno.java',
-        'ChaseKeno.class files'
-      ]
+      description: 'Java application with bytecode available',
+      note: 'Full Java execution requires GraalVM, jlink, or Docker environment',
+      availableFiles: availableFiles
     })
   };
 };
