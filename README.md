@@ -34,5 +34,23 @@ and payout-table RTP calculations.
   and Swing UI
 - `README.md` — local build and run instructions
 
-This repository is a desktop Java application. It does not expose an HTTP
-server and is not configured for Vercel or other web-hosting runtimes.
+## Browser demo
+
+The repository also includes a static browser demo:
+
+- `index.html` — browser UI
+- `styles.css` — responsive visual theme
+- `app.js` — client-side Keno logic and proof verification
+
+To preview it locally, run a static file server from the repository root:
+
+```bash
+python3 -m http.server 8080
+```
+
+Then open <http://localhost:8080>.
+
+The same files can be deployed directly to Vercel, GitHub Pages, Netlify, or
+any static hosting provider. No build step or server runtime is required.
+
+The Java Swing application remains available as the desktop version.

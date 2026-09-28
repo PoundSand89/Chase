@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ChaseKeno browser demo">
+    <title>ChaseKeno Demo</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">CHASE.BET</p>
+          <h1>Keno <span>demo</span></h1>
+        </div>
+        <div class="account-card">
+          <span>Balance</span>
+          <strong id="balance">$1,000.00</strong>
+          <small id="profit">Profit $0.00</small>
+        </div>
+      </header>
+
+      <section class="controls panel">
+        <div class="control-group">
+          <label for="risk">Risk</label>
+          <select id="risk">
+            <option>Classic</option>
+            <option selected>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="multiplier">Games multiplier</label>
+          <select id="multiplier">
+            <option value="1">1x</option>
+            <option value="2" selected>2x</option>
+            <option value="5">5x</option>
+            <option value="10">10x</option>
+            <option value="25">25x</option>
+            <option value="50">50x</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="games">Auto games</label>
+          <input id="games" type="number" min="1" max="1000" value="1">
+        </div>
+        <div class="control-group amount-control">
+          <label for="amount">Bet per game</label>
+          <div class="input-with-prefix"><span>$</span><input id="amount" type="number" min="0.01" step="0.01" value="10.00"></div>
+        </div>
+        <button id="max-bet" class="button secondary">Max</button>
+        <button id="random-pick" class="button secondary">Random pick</button>
+        <button id="clear" class="button secondary">Clear</button>
+      </section>
+
+      <section class="game-layout">
+        <div class="board-panel panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">40 TILES / 10 DRAWN</p>
+              <h2>Choose your numbers</h2>
+            </div>
+            <div class="pick-control">
+              <span>Spots</span>
+              <div id="spot-buttons" class="spot-buttons"></div>
+            </div>
+          </div>
+          <div id="board" class="board" aria-label="Keno number board"></div>
+          <div id="payouts" class="payouts"></div>
+        </div>
+
+        <aside class="side-panel">
+          <section class="panel proof-panel">
+            <div class="panel-heading compact">
+              <div>
+                <p class="eyebrow">PROVABLY FAIR</p>
+                <h2>Round proof</h2>
+              </div>
+              <span id="proof-status" class="status-pill">Ready</span>
+            </div>
+            <label for="client-seed">Client seed</label>
+            <input id="client-seed" type="text" placeholder="Optional custom seed">
+            <dl class="proof-list">
+              <dt>Seed hash</dt><dd id="seed-hash">—</dd>
+              <dt>Nonce</dt><dd id="nonce">0</dd>
+              <dt>Revealed seed</dt><dd id="revealed-seed">—</dd>
+              <dt>Verify hash</dt><dd id="verify-hash">—</dd>
+            </dl>
+            <button id="verify" class="button secondary full-width">Verify last draw</button>
+          </section>
+          <section class="panel action-panel">
+            <div id="status" class="status-message">Pick 1–10 tiles to begin.</div>
+            <button id="draw" class="button draw-button">Draw numbers</button>
+            <p class="fee-note">A 5% platform fee is included in total cost and net result.</p>
+          </section>
+        </aside>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

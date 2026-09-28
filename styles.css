@@ -1,0 +1,85 @@
+:root {
+  color-scheme: dark;
+  --bg: #081225;
+  --surface: #102342;
+  --surface-raised: #173052;
+  --tile: #214d6c;
+  --tile-hover: #2d6688;
+  --outline: #4f7895;
+  --outline-soft: #294d6b;
+  --accent: #ffd166;
+  --accent-bright: #ffe08a;
+  --text: #f4f7fb;
+  --muted: #a8bfd0;
+  --win: #7de2a8;
+  --lose: #e58ab0;
+  --ink: #17253b;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-width: 320px;
+  background: radial-gradient(circle at 80% -20%, #1a3b5d 0, transparent 38%), var(--bg);
+  color: var(--text);
+  font: 15px/1.4 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+.app-shell { width: min(1400px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 44px; }
+.topbar, .panel-heading, .controls, .game-layout { display: flex; }
+.topbar { align-items: center; justify-content: space-between; margin-bottom: 20px; }
+h1, h2, p { margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3.3rem); letter-spacing: -0.06em; line-height: 1; }
+h1 span { color: var(--accent); font-weight: 400; }
+h2 { font-size: 1.1rem; letter-spacing: -0.02em; }
+.eyebrow { color: var(--muted); font-size: .68rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.panel { background: linear-gradient(145deg, rgba(23,48,82,.95), rgba(16,35,66,.97)); border: 1px solid var(--outline); border-radius: 22px; box-shadow: 0 18px 45px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.04); }
+.account-card { min-width: 170px; padding: 12px 16px; border: 1px solid var(--outline); border-radius: 16px; background: rgba(16,35,66,.8); text-align: right; }
+.account-card span, .account-card small { display: block; color: var(--muted); font-size: .75rem; }
+.account-card strong { display: block; color: var(--accent); font-size: 1.35rem; }
+.controls { align-items: end; flex-wrap: wrap; gap: 12px; padding: 16px; margin-bottom: 20px; }
+.control-group { display: grid; gap: 5px; min-width: 120px; }
+.control-group label, .proof-panel > label { color: var(--muted); font-size: .72rem; font-weight: 700; }
+.amount-control { min-width: 150px; }
+input, select { width: 100%; color: var(--text); background: var(--surface); border: 1px solid var(--outline); border-radius: 11px; outline: none; padding: 9px 11px; }
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,209,102,.14); }
+.input-with-prefix { position: relative; }
+.input-with-prefix span { position: absolute; left: 11px; top: 9px; color: var(--muted); }
+.input-with-prefix input { padding-left: 25px; }
+.button { border: 1px solid var(--outline); border-radius: 13px; padding: 10px 15px; color: var(--text); background: var(--surface-raised); font-weight: 800; transition: transform .15s, border-color .15s, background .15s; }
+.button:hover { transform: translateY(-1px); border-color: var(--accent); }
+.button.secondary { height: 39px; }
+.game-layout { align-items: start; gap: 20px; }
+.board-panel { flex: 1 1 700px; padding: clamp(16px, 3vw, 26px); }
+.side-panel { display: grid; flex: 0 1 340px; gap: 20px; }
+.panel-heading { align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.panel-heading.compact { margin-bottom: 16px; }
+.pick-control { text-align: right; }
+.pick-control > span { display: block; color: var(--muted); font-size: .72rem; margin-bottom: 6px; }
+.spot-buttons { display: flex; gap: 5px; }
+.spot-buttons button { width: 30px; height: 30px; border: 1px solid var(--outline); border-radius: 9px; color: var(--text); background: var(--surface); font-weight: 800; }
+.spot-buttons button.active { color: var(--ink); background: var(--accent); border-color: var(--accent-bright); }
+.board { display: grid; grid-template-columns: repeat(8, minmax(36px, 1fr)); gap: clamp(6px, 1vw, 10px); padding: clamp(14px, 2vw, 22px); background: rgba(8,18,37,.55); border: 1px solid var(--outline-soft); border-radius: 18px; }
+.tile { aspect-ratio: 1; min-height: 42px; border: 1px solid var(--outline-soft); border-radius: 17px; color: var(--text); background: linear-gradient(160deg, #2a5e7d, var(--tile)); box-shadow: 0 5px 0 rgba(0,0,0,.18); font-weight: 800; transition: transform .12s, background .12s, border-color .12s; }
+.tile:hover { transform: translateY(-2px); background: var(--tile-hover); border-color: var(--outline); }
+.tile.selected { color: var(--ink); background: linear-gradient(160deg, var(--accent-bright), var(--accent)); border-color: var(--accent-bright); }
+.tile.drawn { color: var(--ink); background: linear-gradient(160deg, #fff, #dfeaf2); border: 2px solid var(--accent); }
+.tile.selected.drawn { background: linear-gradient(160deg, #fff2b4, var(--accent)); }
+.payouts { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; color: var(--muted); font-size: .78rem; }
+.payouts span { padding: 5px 8px; border: 1px solid var(--outline-soft); border-radius: 8px; }
+.proof-panel, .action-panel { padding: 20px; }
+.status-pill { padding: 5px 9px; border: 1px solid var(--outline); border-radius: 999px; color: var(--muted); font-size: .72rem; }
+.status-pill.success { color: var(--win); border-color: var(--win); }
+.proof-list { display: grid; grid-template-columns: 105px 1fr; gap: 9px 10px; margin: 18px 0; font-size: .75rem; }
+.proof-list dt { color: var(--muted); }
+.proof-list dd { overflow: hidden; margin: 0; color: var(--text); text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.full-width { width: 100%; }
+.draw-button { width: 100%; padding: 15px; color: var(--ink); background: var(--accent); border-color: var(--accent-bright); font-size: 1rem; }
+.draw-button:hover { background: var(--accent-bright); }
+.status-message { min-height: 48px; color: var(--muted); }
+.status-message.win { color: var(--win); }
+.status-message.lose { color: var(--lose); }
+.fee-note { margin-top: 13px; color: var(--muted); font-size: .72rem; }
+@media (max-width: 850px) { .game-layout { display: grid; } .side-panel { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .app-shell { width: min(100% - 20px, 1400px); padding-top: 16px; } .topbar { align-items: flex-start; gap: 12px; } .account-card { min-width: 135px; } .controls { align-items: stretch; } .control-group { flex: 1 1 120px; } .controls .button { flex: 1 1 100px; } .panel-heading { display: grid; } .pick-control { text-align: left; } .side-panel { grid-template-columns: 1fr; } }
