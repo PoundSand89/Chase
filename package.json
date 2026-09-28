@@ -2,10 +2,12 @@
   "name": "chase-keno",
   "version": "1.0.0",
   "description": "ChaseKeno Java application",
-  "main": "index.js",
+  "main": "Dockerfile",
   "scripts": {
     "deploy": "vercel",
-    "deploy:prod": "vercel --prod"
+    "deploy:prod": "vercel --prod",
+    "docker:build": "docker build -t chase-keno .",
+    "docker:run": "docker run --rm -p 8080:8080 chase-keno"
   },
   "keywords": [
     "java",
@@ -16,6 +18,7 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "@vercel/ncc": "latest"
+    "@vercel/ncc": "latest",
+    "@vercel/docker": "latest"
   }
 }

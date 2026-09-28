@@ -23,19 +23,17 @@ vercel
 4. Configure the deployment settings
 
 ### Notes
-- This deployment uses Vercel's Node.js runtime
-- Java applications on Vercel will need to use Node.js-based Java runners
-- For production Java applications, consider using:
-  - GraalVM native images
-  - Docker containers
-  - Cloud platforms like AWS/Google Cloud
+- This deployment uses Vercel's Docker runtime
+- Java applications on Vercel now run in containers via Docker
+- For production Java applications, Docker is recommended for reliability
 
 ### Deployment Configuration
 This project includes:
 - Java bytecode (ChaseKeno$*.class files)
 - Java source code (ChaseKeno.java)
 - Vercel deployment configuration (package.json)
-- Simple Node.js handler (index.js)
+- Vercel Docker configuration (Dockerfile)
+- Java application runner (Docker container)
 
 ### URLs
 - GitHub Repository: https://github.com/PoundSand89/Chase.git
