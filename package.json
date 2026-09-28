@@ -1,0 +1,21 @@
+{
+  "name": "chase-keno",
+  "version": "1.0.0",
+  "description": "ChaseKeno Java application",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "vercel",
+    "deploy:prod": "vercel --prod"
+  },
+  "keywords": [
+    "java",
+    "chase",
+    "keno"
+  ],
+  "author": "PoundSand89",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@vercel/ncc": "latest"
+  }
+}
