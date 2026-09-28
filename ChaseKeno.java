@@ -188,6 +188,18 @@ public class ChaseKeno {
     public static final int TOTAL_TILES = 40, DRAW_COUNT = 10;
     public static final double PLATFORM_FEE_PERCENT = 5.0, MAX_MULTIPLIER = 1000.0;
 
+    private static double roundMoney(double amount) {
+        return Math.round(amount * 100.0) / 100.0;
+    }
+
+    public static double platformFee(double betSize) {
+        return roundMoney(betSize * PLATFORM_FEE_PERCENT / 100.0);
+    }
+
+    public static double totalRoundCost(double betSize) {
+        return roundMoney(betSize + platformFee(betSize));
+    }
+
     public static final class Result {
         public final String player, riskLevel;
         public final double betSize, multiplier, platformFeeAmount, finalPayout, netWin;
@@ -218,12 +230,12 @@ public class ChaseKeno {
         int matches = 0;
         for (int p : picks) if (drawn.contains(p)) matches++;
         double mult = tableFor(risk)[picks.size()][matches];
-        double fee = Math.round(betSize * PLATFORM_FEE_PERCENT / 100.0 * 100.0) / 100.0;
-        double gross = Math.round(betSize * mult * 100.0) / 100.0;
-        double maxPayout = Math.round(betSize * MAX_MULTIPLIER * 100.0) / 100.0;
+        double fee = platformFee(betSize);
+        double gross = roundMoney(betSize * mult);
+        double maxPayout = roundMoney(betSize * MAX_MULTIPLIER);
         double payout = Math.min(gross, maxPayout);
-        double net = Math.round((payout - betSize - fee) * 100.0) / 100.0;
-        return new Result(player, Math.round(betSize * 100.0) / 100.0,
+        double net = roundMoney(payout - betSize - fee);
+        return new Result(player, roundMoney(betSize),
                 proof.picks, proof.drawnTiles, matches, mult, fee, payout,
                 net, payout > 0, risk, proof, MAX_MULTIPLIER);
     }
@@ -239,6 +251,11 @@ public class ChaseKeno {
         System.out.printf("Risk=%s Picks=%d Matches=%d Mult=%.2fx  Bet=$%.2f Fee=$%.2f Payout=$%.2f Net=$%.2f%n",
                 r.riskLevel, r.pickCount, r.matches, r.multiplier, r.betSize,
                 r.platformFeeAmount, r.finalPayout, r.netWin);
+        if (r.platformFeeAmount != platformFee(r.betSize)
+                || totalRoundCost(r.betSize) != roundMoney(r.betSize + r.platformFeeAmount)
+                || r.netWin != roundMoney(r.finalPayout - totalRoundCost(r.betSize))) {
+            throw new AssertionError("fee accounting is inconsistent");
+        }
         System.out.println("SeedHash:      " + pf.getSeedHash());
         System.out.println("Verify (reveal): " + r.proof.verify(pf));
 
@@ -539,7 +556,7 @@ public class ChaseKeno {
         }
         private void setRisk(String r) { this.risk = r; updatePayout(); }
         private void setMaxBet() {
-            betSize = balance / Math.max(1, multiplier);
+            betSize = roundMoney(balance / (Math.max(1, multiplier) * (1.0 + PLATFORM_FEE_PERCENT / 100.0)));
             amountFld.setText(String.format("%.2f", betSize));
         }
         private void randomPick() {
@@ -582,13 +599,13 @@ public class ChaseKeno {
         }
         private double totalBet() {
             try { betSize = Double.parseDouble(amountFld.getText()); } catch (Exception ex) { betSize = 0; }
-            return betSize * multiplier;
+            return roundMoney(betSize * multiplier);
         }
         private void runDraw() {
             if (running) return;
             double bet = totalBet();
             if (bet <= 0) { statusLbl.setText("Enter a positive bet."); return; }
-            if (bet > balance) { statusLbl.setText("Insufficient balance."); return; }
+            if (totalRoundCost(bet) > balance) { statusLbl.setText("Insufficient balance for bet and fee."); return; }
             if (picks.isEmpty()) { statusLbl.setText("Pick some tiles first."); return; }
             ProvablyFair pf = new ProvablyFair(serverSeed, clientSeed, nonce);
             Result r = resolveRound(bet, picks, risk, pf, "Player");
@@ -634,7 +651,7 @@ public class ChaseKeno {
                     return;
                 }
                 double bet = totalBet();
-                if (bet <= 0 || bet > balance || picks.isEmpty()) {
+                if (bet <= 0 || totalRoundCost(bet) > balance || picks.isEmpty()) {
                     stopAutoplay();
                     return;
                 }
