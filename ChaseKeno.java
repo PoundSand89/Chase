@@ -300,9 +300,26 @@ public class ChaseKeno {
     }
 
     // ================================================================== #
-    //  Swing GUI  (dark blue background, yellow accents, Stake style)
+    //  Swing GUI
     // ================================================================== #
     static final int TILE_SIZE = 54;
+
+    static final class Theme {
+        static final Color BACKGROUND = new Color(0x081225);
+        static final Color SURFACE = new Color(0x102342);
+        static final Color SURFACE_RAISED = new Color(0x173052);
+        static final Color TILE = new Color(0x214d6c);
+        static final Color TILE_HOVER = new Color(0x2d6688);
+        static final Color OUTLINE = new Color(0x4f7895);
+        static final Color OUTLINE_SOFT = new Color(0x294d6b);
+        static final Color ACCENT = new Color(0xffd166);
+        static final Color ACCENT_BRIGHT = new Color(0xffe08a);
+        static final Color TEXT = new Color(0xf4f7fb);
+        static final Color MUTED = new Color(0xa8bfd0);
+        static final Color WIN = new Color(0x7de2a8);
+        static final Color LOSE = new Color(0xe58ab0);
+        static final Color INK = new Color(0x17253b);
+    }
 
     /** Rounded border used for spot buttons / toolbar buttons. */
     static class RoundedBorder implements javax.swing.border.Border {
@@ -311,16 +328,15 @@ public class ChaseKeno {
         public void paintBorder(Component comp, Graphics g, int x, int y, int w, int h) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(c); g2.setStroke(new BasicStroke(1f));
-            g2.drawRoundRect(x, y, w - 1, h - 1, r, r);
+            g2.setColor(c); g2.setStroke(new BasicStroke(1.4f));
+            g2.drawRoundRect(x + 1, y + 1, w - 3, h - 3, r, r);
             g2.dispose();
         }
         public Insets getBorderInsets(Component c) { return new Insets(4, 8, 4, 8); }
         public boolean isBorderOpaque() { return false; }
     }
 
-    /** Circular tile.  Selected = yellow, drawn (winning) = white with gold ring,
-     *  normal = muted blue.  Drawn is always visually distinct from selected. */
+    /** Soft-corner tile with separate selected and drawn states. */
     static class TileButton extends JButton {
         private boolean sel = false, drw = false;
         TileButton(int n) {
@@ -332,6 +348,7 @@ public class ChaseKeno {
             setHorizontalAlignment(SwingConstants.CENTER);
             setVerticalAlignment(SwingConstants.CENTER);
             setFont(new Font("SansSerif", Font.BOLD, 15));
+            setForeground(Theme.TEXT);
             setContentAreaFilled(false);
             setBorderPainted(false);
             setOpaque(false);
@@ -344,18 +361,22 @@ public class ChaseKeno {
             int w = getWidth(), h = getHeight();
             Color fill, ring, fg;
             if (drw) {
-                fill = new Color(0xf4f7fb); ring = new Color(0xffd700); fg = new Color(0x1a2a4a);
+                fill = Theme.TEXT; ring = Theme.ACCENT; fg = Theme.INK;
             } else if (sel) {
-                fill = new Color(0xffd700); ring = new Color(0xfff37a); fg = new Color(0x1a2a4a);
+                fill = Theme.ACCENT; ring = Theme.ACCENT_BRIGHT; fg = Theme.INK;
+            } else if (getModel().isRollover()) {
+                fill = Theme.TILE_HOVER; ring = Theme.OUTLINE; fg = Theme.TEXT;
             } else {
-                fill = new Color(0x3b7a8b); ring = new Color(0x8fa8b8); fg = new Color(0xe6e4de);
+                fill = Theme.TILE; ring = Theme.OUTLINE_SOFT; fg = Theme.TEXT;
             }
-            int arc = 8;
-            g2.setColor(fill);
-            g2.fillRoundRect(2, 2, w - 4, h - 4, arc, arc);
+            int arc = 18;
+            g2.setColor(new Color(0x000000, true));
+            g2.fillRoundRect(3, 4, w - 6, h - 6, arc, arc);
+            g2.setPaint(new GradientPaint(0, 2, fill.brighter(), 0, h - 4, fill));
+            g2.fillRoundRect(2, 2, w - 4, h - 6, arc, arc);
             g2.setColor(ring);
-            g2.setStroke(new BasicStroke(2f));
-            g2.drawRoundRect(2, 2, w - 4, h - 4, arc, arc);
+            g2.setStroke(new BasicStroke(sel || drw ? 2.2f : 1.4f));
+            g2.drawRoundRect(2, 2, w - 4, h - 6, arc, arc);
             g2.setColor(fg);
             FontMetrics fm = g2.getFontMetrics(getFont());
             String s = getText();
@@ -372,14 +393,14 @@ public class ChaseKeno {
             super(String.valueOf(n));
             setPreferredSize(new Dimension(50, 36));
             setFocusPainted(false); setOpaque(true);
-            setBorder(new RoundedBorder(12, new Color(0x8fa8b8)));
-            setForeground(Color.WHITE); setBackground(new Color(0x1a3a5a));
+            setBorder(new RoundedBorder(16, Theme.OUTLINE));
+            setForeground(Theme.TEXT); setBackground(Theme.SURFACE);
             setFont(new Font("SansSerif", Font.BOLD, 12));
         }
         @Override public void setSelected(boolean s) {
-            setBackground(s ? new Color(0xffd700) : new Color(0x1a3a5a));
-            setForeground(s ? new Color(0x1a2a4a) : Color.WHITE);
-            setBorder(new RoundedBorder(12, s ? new Color(0xfff37a) : new Color(0x8fa8b8)));
+            setBackground(s ? Theme.ACCENT : Theme.SURFACE);
+            setForeground(s ? Theme.INK : Theme.TEXT);
+            setBorder(new RoundedBorder(16, s ? Theme.ACCENT_BRIGHT : Theme.OUTLINE));
             super.setSelected(s);
         }
     }
@@ -408,7 +429,8 @@ public class ChaseKeno {
             setDefaultCloseOperation(EXIT_ON_CLOSE);
             setSize(1300, 840);
             setLayout(new BorderLayout(12, 12));
-            getContentPane().setBackground(new Color(0x0a1429));
+            getContentPane().setBackground(Theme.BACKGROUND);
+            ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
             setLocationRelativeTo(null);
 
             // ---- top toolbar ----
@@ -416,31 +438,37 @@ public class ChaseKeno {
             top.setOpaque(false);
             JToggleButton modeBtn = new JToggleButton("Manual");
             modeBtn.setFocusable(false); modeBtn.setOpaque(true);
-            modeBtn.setBorder(new RoundedBorder(14, new Color(0x8fa8b8)));
+            modeBtn.setBackground(Theme.SURFACE);
+            modeBtn.setForeground(Theme.TEXT);
+            modeBtn.setBorder(new RoundedBorder(16, Theme.OUTLINE));
             modeBtn.setPreferredSize(new Dimension(90, 34));
             modeBtn.addActionListener(e -> {
                 mode = modeBtn.isSelected() ? "Auto" : "Manual";
                 modeBtn.setText(mode);
-                modeBtn.setBackground(mode.equals("Auto") ? new Color(0xffd700) : new Color(0x1a3a5a));
-                modeBtn.setForeground(mode.equals("Auto") ? new Color(0x1a2a4a) : Color.WHITE);
-                modeBtn.setBorder(new RoundedBorder(14, mode.equals("Auto") ? new Color(0xfff37a) : new Color(0x8fa8b8)));
+                modeBtn.setBackground(mode.equals("Auto") ? Theme.ACCENT : Theme.SURFACE);
+                modeBtn.setForeground(mode.equals("Auto") ? Theme.INK : Theme.TEXT);
+                modeBtn.setBorder(new RoundedBorder(16, mode.equals("Auto") ? Theme.ACCENT_BRIGHT : Theme.OUTLINE));
             });
             top.add(modeBtn);
             JButton multBtn = new JButton("2x");
             multBtn.setFocusable(false); multBtn.setOpaque(true);
-            multBtn.setBorder(new RoundedBorder(14, new Color(0x8fa8b8)));
+            multBtn.setBackground(Theme.SURFACE);
+            multBtn.setForeground(Theme.TEXT);
+            multBtn.setBorder(new RoundedBorder(16, Theme.OUTLINE));
             multBtn.setPreferredSize(new Dimension(70, 34));
             multBtn.addActionListener(e -> cycleMult());
             top.add(multBtn);
-            top.add(new JLabel("Games:"));
+            top.add(label("Games:"));
             gamesSpin = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
             gamesSpin.setMaximumSize(new Dimension(70, 28));
-            gamesSpin.setBorder(new RoundedBorder(10, new Color(0x8fa8b8)));
+            gamesSpin.setBorder(new RoundedBorder(12, Theme.OUTLINE));
             top.add(gamesSpin);
             for (String lvl : new String[]{"Classic", "Medium", "High"}) {
                 JToggleButton b = new JToggleButton(lvl, lvl.equals(risk));
                 b.setFocusable(false); b.setOpaque(true);
-                b.setBorder(new RoundedBorder(14, new Color(0x8fa8b8)));
+                b.setBackground(lvl.equals(risk) ? Theme.ACCENT : Theme.SURFACE);
+                b.setForeground(lvl.equals(risk) ? Theme.INK : Theme.TEXT);
+                b.setBorder(new RoundedBorder(16, lvl.equals(risk) ? Theme.ACCENT_BRIGHT : Theme.OUTLINE));
                 b.setPreferredSize(new Dimension(90, 34));
                 b.addActionListener(e -> setRisk(lvl));
                 top.add(b);
@@ -453,16 +481,19 @@ public class ChaseKeno {
             top.add(button("MAX", e -> setMaxBet()));
             top.add(button("Reset", e -> resetAll()));
             balanceLbl = new JLabel();
+            balanceLbl.setFont(new Font("SansSerif", Font.BOLD, 13));
             top.add(balanceLbl);
             add(top, BorderLayout.NORTH);
 
             // ---- center board ----
             JPanel board = new JPanel(new GridLayout(5, 8, 5, 5));
             board.setOpaque(true);
-            board.setBackground(new Color(0x0d2040));
+            board.setBackground(Theme.SURFACE);
             board.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(0x8fa8b8), 2),
-                    BorderFactory.createEmptyBorder(10, 16, 10, 16)));
+                    BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(Theme.OUTLINE_SOFT, 1),
+                            BorderFactory.createLineBorder(Theme.OUTLINE, 1)),
+                    BorderFactory.createEmptyBorder(16, 18, 16, 18)));
             for (int i = 1; i <= 40; i++) {
                 TileButton b = new TileButton(i);
                 int n = i;
@@ -478,7 +509,8 @@ public class ChaseKeno {
             south.setOpaque(false);
 
             payoutLbl = new JLabel("", SwingConstants.CENTER);
-            payoutLbl.setForeground(new Color(0xffd700));
+            payoutLbl.setForeground(Theme.ACCENT);
+            payoutLbl.setFont(new Font("SansSerif", Font.BOLD, 13));
             south.add(payoutLbl);
 
             JPanel spots = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 4));
@@ -494,24 +526,24 @@ public class ChaseKeno {
 
             JPanel pf = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
             pf.setOpaque(false);
-            pf.add(new JLabel("Seed hash:"));
+            pf.add(label("Seed hash:"));
             seedHashLbl = new JLabel();
-            seedHashLbl.setForeground(new Color(0xa0b8c8));
+            seedHashLbl.setForeground(Theme.MUTED);
             seedHashLbl.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
             pf.add(seedHashLbl);
-            pf.add(new JLabel("Revealed:"));
+            pf.add(label("Revealed:"));
             revealLbl = new JLabel();
             pf.add(revealLbl);
-            pf.add(new JLabel("Client:"));
+            pf.add(label("Client:"));
             clientFld = new JTextField(10);
             clientFld.addActionListener(e -> refreshCommitment());
             pf.add(clientFld);
-            pf.add(new JLabel("Nonce:"));
+            pf.add(label("Nonce:"));
             nonceLbl = new JLabel();
             pf.add(nonceLbl);
-            pf.add(new JLabel("Verify hash:"));
+            pf.add(label("Verify hash:"));
             verifyHashLbl = new JLabel();
-            verifyHashLbl.setForeground(new Color(0xa0b8c8));
+            verifyHashLbl.setForeground(Theme.MUTED);
             verifyHashLbl.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
             pf.add(verifyHashLbl);
             pf.add(button("Verify", e -> verifyRound()));
@@ -522,7 +554,7 @@ public class ChaseKeno {
             drawBtn = button("DRAW", e -> runDraw());
             drawRow.add(drawBtn);
             statusLbl = new JLabel("Place your bet and pick 1-10 tiles.");
-            statusLbl.setForeground(new Color(0xa0b8c8));
+            statusLbl.setForeground(Theme.MUTED);
             drawRow.add(statusLbl);
             south.add(drawRow);
             add(south, BorderLayout.SOUTH);
@@ -536,17 +568,23 @@ public class ChaseKeno {
         private JButton button(String text, ActionListener al) {
             JButton b = new JButton(text);
             b.setFocusable(false); b.setOpaque(true);
-            b.setBorder(new RoundedBorder(14, new Color(0x8fa8b8)));
-            b.setBackground(new Color(0x1a3a5a)); b.setForeground(Color.WHITE);
+            b.setBorder(new RoundedBorder(16, Theme.OUTLINE));
+            b.setBackground(Theme.SURFACE_RAISED); b.setForeground(Theme.TEXT);
             b.setPreferredSize(new Dimension(120, 36));
             b.setFont(new Font("SansSerif", Font.BOLD, 12));
             b.addActionListener(al);
             return b;
         }
 
+        private JLabel label(String text) {
+            JLabel label = new JLabel(text);
+            label.setForeground(Theme.MUTED);
+            return label;
+        }
+
         private void refreshBalance() {
             balanceLbl.setText(String.format("Balance: $%,.2f   Profit: $%,.2f", balance, profit));
-            balanceLbl.setForeground(balance >= 0 ? new Color(0xffd700) : Color.RED);
+            balanceLbl.setForeground(balance >= 0 ? Theme.ACCENT : Theme.LOSE);
         }
         private void cycleMult() {
             int idx = 0;
@@ -629,7 +667,7 @@ public class ChaseKeno {
             refreshCommitment();
             statusLbl.setText((r.win ? "WIN " : "LOSE ") + r.matches + "/" + r.pickCount
                     + "  net $" + String.format("%.2f", r.netWin));
-            statusLbl.setForeground(r.win ? new Color(0xffd700) : new Color(0xd96ba8));
+            statusLbl.setForeground(r.win ? Theme.WIN : Theme.LOSE);
             updatePayout();
         }
         private void updatePayout() {
