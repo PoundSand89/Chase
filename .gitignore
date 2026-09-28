@@ -1,7 +1,16 @@
-# Node.js
+# Java build output
+*.class
+
+# Dependency and deployment caches from previous tooling
 node_modules/
 package-lock.json
+.vercel/
 
-# Vercel
-.vercel
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Local configuration
 .env*
